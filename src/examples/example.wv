@@ -1,0 +1,8 @@
+/** Import drum.wav from `./samples`
+imp {
+    drum as d
+}
+
+s [
+    "d d d d {120}"
+]
