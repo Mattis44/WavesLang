@@ -16,3 +16,7 @@ void SetStmt::accept(StmtVisitor& visitor) {
 void CpmStmt::accept(StmtVisitor& visitor) {
     visitor.visitCpmStmt(*this);
 }
+
+void LoopStmt::accept(StmtVisitor& visitor) {
+    visitor.visitLoopStmt(*this);
+}

@@ -27,6 +27,7 @@ static const std::unordered_map<std::string, TokenType> keywords = {
 	{"sample",                                 TokenType::SAMPLE},
 	{"volume",                                 TokenType::VOLUME},
 	{"pitch",                                  TokenType::PITCH},
+	{"loop",                                   TokenType::LOOP},
 };
 
 Lexer::Lexer(const std::string& source)
@@ -148,14 +149,15 @@ void Lexer::string() {
 
 void Lexer::number() {
 	while(std::isdigit(peek())) advance();
+	// 1
 
 	if (peek() == '.' && std::isdigit(peek_next())) {
         advance();
         while(std::isdigit(peek())) {
             advance();
         }
-    }
-
+	}
+	std::cout << start + " " + (int)(current - start) + peek();
 	std::string value = source.substr(start, current - start);
 	tokens.emplace_back(TokenType::NUMBER, value, line);
 }

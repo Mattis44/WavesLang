@@ -1,5 +1,12 @@
 #include "Parser.h"
 #include <iostream>
+#include <unordered_set>
+
+static const std::unordered_set<TokenType> parameterKeywords = {
+	TokenType::SAMPLE,
+	TokenType::VOLUME,
+	TokenType::PITCH
+};
 
 Parser::Parser(const std::vector<Token>& tokens)
 	: tokens(tokens) { }
@@ -20,6 +27,7 @@ std::unique_ptr<Stmt> Parser::declaration() {
 	if (match(TokenType::PLAY)) return playStatement();
 	if (match(TokenType::SET)) return setStatement();
 	if (match(TokenType::CPM)) return cpmStatement();
+	if (match(TokenType::LOOP)) return loopStatement();
 
 	std::cerr << "[Parser] Unexpected token '" << peek().lexeme << "'\n";
 	advance();
@@ -90,37 +98,44 @@ std::unique_ptr<Stmt> Parser::setStatement() {
 
 	std::vector<ParamEntry> params;
 
-	while(!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+	while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
 		Token name = advance();
-		std::cout << name.lexeme << std::endl;
-		if (name.type != TokenType::IDENTIFIER) {
-            std::cerr << "[Parser] Expected parameter name.\n";
-            break;
-        }
-
-		Token value = advance();
-		if (value.type != TokenType::STRING && value.type != TokenType::IDENTIFIER) {
-			std::cerr << "[Parser] Expected value after " << name.lexeme << ".\n";
-			break;
+		if (name.type != TokenType::IDENTIFIER && !parameterKeywords.count(name.type)) {
+			std::cerr << "[Parser] Expected parameter name.\n";
+			synchronize();
+			continue;
 		}
 
-		params.push_back({ name.lexeme, value.lexeme});
+		if (isAtEnd()) break;
+		Token value = advance();
 
-		if (!match(TokenType::SEMICOLON)) {
-            std::cerr << "[Parser] Expected ';' after parameter '" << name.lexeme << "'\n";
-            break;
-        }
+		if (value.type != TokenType::STRING &&
+			value.type != TokenType::NUMBER &&
+			value.type != TokenType::IDENTIFIER) {
+			std::cerr << "[Parser] Expected value after '" << name.lexeme << "'.\n";
+			synchronize();
+			continue;
+		}
 
-		if (match(TokenType::COMMA)) continue;
-		else break;
+		params.push_back({ name.lexeme, value.lexeme });
+
+		if (match(TokenType::SEMICOLON)) {
+			continue;
+		}
+
+		if (check(TokenType::RIGHT_BRACE)) break;
+
+		synchronize();
 	}
-	
-	if (!match(TokenType::RIGHT_BRACE)) {
-        std::cerr << "[Parser] Expected '}' after set block.\n";
-    }
 
-	std::make_unique<SetStmt>(alias.lexeme, std::move(params));
+	if (!match(TokenType::RIGHT_BRACE)) {
+		std::cerr << "[Parser] Expected '}' after set block.\n";
+		return nullptr;
+	}
+
+	return std::make_unique<SetStmt>(alias.lexeme, std::move(params));
 }
+
 
 std::unique_ptr<Stmt> Parser::cpmStatement() {
 	Token number = advance();
@@ -140,6 +155,54 @@ std::unique_ptr<Stmt> Parser::cpmStatement() {
 
 	match(TokenType::SEMICOLON);
 	return std::make_unique<CpmStmt>(value);
+}
+
+std::unique_ptr<Stmt> Parser::loopStatement() {
+	if (!match(TokenType::LEFT_BRACE)) {
+		std::cerr << "[Parser] Expected '{' in loop.\n";
+		return nullptr;
+	}
+
+	std::vector<ParamEntry> params;
+
+	while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+		Token name = advance();
+
+		if (name.type != TokenType::IDENTIFIER && parameterKeywords.count(name.type)) {
+			std::cerr << "[Parser] Expected parameter name.\n";
+			synchronize();
+			continue;
+		}
+
+		if (isAtEnd()) break;
+
+		Token value = advance();
+		
+		if (value.type != TokenType::IDENTIFIER &&
+			value.type != TokenType::STRING &&
+			value.type != TokenType::NUMBER) {
+			std::cerr << "[Parser] Expected value after '" << name.lexeme << "'.\n";
+			synchronize();
+			continue;
+		}
+
+		params.push_back({ name.lexeme, value.lexeme });
+
+		if (match(TokenType::SEMICOLON)) {
+			continue;
+		}
+
+		if (check(TokenType::RIGHT_BRACE)) break;
+
+		synchronize();
+	}
+
+	if (!match(TokenType::RIGHT_BRACE)) {
+		std::cerr << "[Parser] Expected '}' after set block.\n";
+		return nullptr;
+	}
+
+	return std::make_unique<LoopStmt>(std::move(params));
 }
 
 bool Parser::match(TokenType type) {
@@ -170,4 +233,16 @@ Token Parser::peek() const {
 
 Token Parser::previous() const {
 	return tokens[current - 1];
+}
+
+void Parser::synchronize() {
+	while (!isAtEnd()) {
+		if (previous().type == TokenType::SEMICOLON) return;
+		switch (peek().type) {
+		case TokenType::RIGHT_BRACE:
+			return;
+		default:
+			advance();
+		}
+	}
 }

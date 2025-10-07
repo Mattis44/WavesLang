@@ -36,10 +36,17 @@ public:
 };
 
 class CpmStmt : public Stmt {
-	public:
-		double value;
-		CpmStmt(double v) : value(std::move(v)) {}
-		void accept(StmtVisitor& visitor) override; 
+public:
+	double value;
+	CpmStmt(double v) : value(std::move(v)) {}
+	void accept(StmtVisitor& visitor) override; 
+};
+
+class LoopStmt : public Stmt {
+public:
+	std::vector<ParamEntry> params;
+	LoopStmt(std::vector<ParamEntry> p) : params(std::move(p)) {}
+	void accept(StmtVisitor& visitor) override;
 };
 
 class StmtVisitor {
@@ -48,4 +55,5 @@ public:
 	virtual void visitPlayStmt(PlayStmt& stmt) = 0;
 	virtual void visitSetStmt(SetStmt& stmt) = 0;
 	virtual void visitCpmStmt(CpmStmt& stmt) = 0;
+	virtual void visitLoopStmt(LoopStmt& stmt) = 0;
 };

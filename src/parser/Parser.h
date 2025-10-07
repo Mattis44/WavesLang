@@ -19,6 +19,7 @@ private:
 	std::unique_ptr<Stmt> playStatement();
 	std::unique_ptr<Stmt> setStatement();
 	std::unique_ptr<Stmt> cpmStatement();
+	std::unique_ptr<Stmt> loopStatement();
 
 	bool match(TokenType type);
 	bool check(TokenType type) const;
@@ -26,4 +27,5 @@ private:
 	bool isAtEnd() const;
 	Token peek() const;
 	Token previous() const;
+	void synchronize();
 };

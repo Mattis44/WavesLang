@@ -14,6 +14,7 @@ enum class TokenType {
 	SAMPLE,
 	VOLUME,
 	PITCH,
+	LOOP,
 
 	IDENTIFIER,
 	STRING,

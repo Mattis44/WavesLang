@@ -2,14 +2,18 @@
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
 #include "interpreter/Interpreter.h"
+#include "ast/AstPrinter.h"
 #include <fstream>
 #include <sstream>
 
 using namespace std;
 
-int main()
-{
-	std::ifstream file("src/examples/example.wv");
+int main() {
+	std::ifstream file("examples/example.wv");
+	if (!file) {
+		std::cerr << "Error opening file";
+		return 1;
+	}
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	std::string source = buffer.str();
@@ -20,8 +24,14 @@ int main()
 	Parser parser(tokens);
 	auto statements = parser.parse();
 
-	Interpreter interpreter;
-	interpreter.interpret(statements);
+	AstPrinter printer;
+	for (auto& st : statements) {
+		if (st) st->accept(printer);
+	}
+
+	//Interpreter interpreter;
+	//interpreter.interpret(statements);
+
 
 	return 0;
 }
