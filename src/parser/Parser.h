@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "../lexer/Token.h"
+#include "lexer/Token.h"
 #include "Stmt.h"
 
 class Parser {
@@ -17,6 +17,8 @@ private:
 	std::unique_ptr<Stmt> declaration();
 	std::unique_ptr<Stmt> importStatement();
 	std::unique_ptr<Stmt> playStatement();
+	std::unique_ptr<Stmt> setStatement();
+	std::unique_ptr<Stmt> cpmStatement();
 
 	bool match(TokenType type);
 	bool check(TokenType type) const;

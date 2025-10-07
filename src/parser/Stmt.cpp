@@ -8,3 +8,11 @@ void ImportStmt::accept(StmtVisitor& visitor) {
 void PlayStmt::accept(StmtVisitor& visitor) {
 	visitor.visitPlayStmt(*this);
 }
+
+void SetStmt::accept(StmtVisitor& visitor) {
+    visitor.visitSetStmt(*this);
+}
+
+void CpmStmt::accept(StmtVisitor& visitor) {
+    visitor.visitCpmStmt(*this);
+}

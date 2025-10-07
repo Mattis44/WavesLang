@@ -1,8 +1,17 @@
-/** Import drum.wav from `./samples`
 imp {
-    drum as d
+    drum as d,
+    piano as p
 }
 
-s [
-    "d d d d {120}"
-]
+cpm 120;
+
+set d {
+    sample "drum.wav";
+    volume 0,8;
+    pitch 1,8;
+}
+
+loop {
+    play d;
+    play p;
+}

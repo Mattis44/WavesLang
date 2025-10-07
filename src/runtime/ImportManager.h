@@ -3,12 +3,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <filesystem>
-
-struct ImportEntry {
-	std::string name;
-	std::string alias;
-	std::string path;
-};
+#include "common/Entries.h"
 
 class ImportManager {
 public:

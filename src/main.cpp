@@ -1,22 +1,18 @@
-﻿// WavesLang.cpp : Defines the entry point for the application.
-//
-
-#include <iostream>
+﻿#include <iostream>
 #include "lexer/Lexer.h"
 #include "parser/Parser.h"
 #include "interpreter/Interpreter.h"
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
 int main()
 {
-	std::string source = R"(
-imp {
-	drum as d,
-	piano as p
-}
-play d
-)";
+	std::ifstream file("src/examples/example.wv");
+	std::stringstream buffer;
+	buffer << file.rdbuf();
+	std::string source = buffer.str();
 
 	Lexer lexer(source);
 	auto tokens = lexer.scanTokens();

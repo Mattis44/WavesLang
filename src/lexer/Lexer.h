@@ -20,11 +20,12 @@ public:
 	bool isAtEnd() const;
 	char advance();
 	char peek() const;
+	char peek_next() const;
 	bool match(char expected);
 
 	void scanToken();
 	void addToken(TokenType type);
 	void identifier();
 	void string();
-	TokenType keywordType(const std::string& text);
+	void number();
 };

@@ -1,6 +1,6 @@
 #pragma once
-#include "../parser/Stmt.h"
-#include "../runtime/ImportManager.h"
+#include "parser/Stmt.h"
+#include "runtime/ImportManager.h"
 #include <vector>
 #include <memory>
 
@@ -10,6 +10,8 @@ public:
 
 	void visitImportStmt(ImportStmt& stmt) override;
 	void visitPlayStmt(PlayStmt& stmt) override;
+	void visitSetStmt(SetStmt& stmt) override;
+	void visitCpmStmt(CpmStmt& stmt) override;
 
 private:
 	ImportManager importManager;

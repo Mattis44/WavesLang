@@ -10,8 +10,7 @@ void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements
 
 void Interpreter::visitImportStmt(ImportStmt& stmt) {
 	for (const auto& entry : stmt.entries) {
-		std::string path = "vendor/" + entry.name + ".wav";
-
+		std::string path = "src/vendor/" + entry.name + ".wav";
 		if (!std::filesystem::exists(path)) {
 			std::cerr << "[ImportError] file not found: " << path << "\n";
 			continue;
@@ -36,4 +35,15 @@ void Interpreter::visitPlayStmt(PlayStmt& stmt) {
 	}
 
 	std::cout << "Playing sample: " << stmt.alias << " (" << entry->path << ")\n";
+}
+
+void Interpreter::visitSetStmt(SetStmt& stmt) {
+    std::cout << "Setting " << stmt.alias << ":\n";
+    for (const auto& param : stmt.params) {
+        std::cout << "  " << param.name << " = " << param.value << "\n";
+    }
+}
+
+void Interpreter::visitCpmStmt(CpmStmt& stmt) {
+	
 }
