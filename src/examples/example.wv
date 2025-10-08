@@ -1,9 +1,10 @@
 imp {
     kick as k,
-    snare as s
+    snare as s,
+    hi_hat as hh
 }
 
-cpm 120;
+cpm 200;
 
 set d {
     // sample "drum.wav";
@@ -13,6 +14,7 @@ set d {
 
 loop {
     play k;
-    wait 1/4;
+    play hh;
     play s;
+    play hh;
 }

@@ -33,4 +33,6 @@ private:
 
     void initParamHandlers();
     void initLoopActions();
+    
+    double parseBeatValue(const std::string& value) const;
 };

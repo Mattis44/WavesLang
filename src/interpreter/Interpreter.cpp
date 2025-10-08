@@ -3,7 +3,10 @@
 #include <filesystem>
 #include <chrono>
 #include <thread>
+#include <algorithm>
 #include <audio/engine.h>
+#include <cmath>
+#include <exception>
 
 Interpreter::Interpreter() {
 	initParamHandlers();
@@ -40,21 +43,11 @@ void Interpreter::initLoopActions() {
 			<< " (vol=" << currentVolume
 			<< ", pitch=" << currentPitch << ")\n";
 	};
-
-	/*loopActions["stop"] = [this](const ParamEntry& p) {
-		std::cout << "  [loop] Stopping " << p.value << "\n";
-		};
-
-	loopActions["wait"] = [this](const ParamEntry& p) {
-		int ms = std::stoi(p.value);
-		std::cout << "  [loop] Waiting " << ms << " ms\n";
-		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-		};*/
 }
 
 
 void Interpreter::interpret(const std::vector<std::unique_ptr<Stmt>>& statements) {
-	for (const auto& stmt : statements) {
+        for (const auto& stmt : statements) {
 		if (stmt) stmt->accept(*this);
 	}
 }
@@ -106,37 +99,83 @@ void Interpreter::visitCpmStmt(CpmStmt& stmt) {
 }
 
 void Interpreter::visitLoopStmt(LoopStmt& stmt) {
-	std::cout << "[LOOP] Starting loop at " << cpm << " CPM.\n";
+        std::cout << "[LOOP] Starting loop at " << cpm << " CPM.\n";
 
-	const double beatDurationMs = (60.0 / cpm) * 1000.0;
+        const double beatDurationMs = (60.0 / cpm) * 1000.0;
 
-	const size_t stepCount = stmt.params.size();
-	if (stepCount == 0) {
-		std::cerr << "[LoopError] Empty loop block.\n";
-		return;
-	}
+        const size_t stepCount = stmt.params.size();
+        if (stepCount == 0) {
+                std::cerr << "[LoopError] Empty loop block.\n";
+                return;
+        }
 
-	const double stepDurationMs = beatDurationMs / stepCount;
+        while (true) {
+            double offsetBeats = 0.0;
+            double maxBeats = 0.0;
 
-	while (true) {
-		int index = 0;
-		for (const auto& action : stmt.params) {
-			auto it = loopActions.find(action.name);
-			if (it == loopActions.end()) {
-				std::cerr << "[Warning] Unknown loop action: " << action.name << "\n";
-				continue;
-			}
+            for (const auto& action : stmt.params) {
+                if (action.name == "wait") {
+                    double beatsToWait = parseBeatValue(action.value);
+                    if (beatsToWait < 0.0) {
+                        std::cerr << "[LoopError] Invalid wait value: " << action.value << "\n";
+                        continue;
+                    }
 
-			std::thread([=]() {
-				std::this_thread::sleep_for(std::chrono::milliseconds((int)(index * stepDurationMs)));
-				it->second(action);
-				}).detach();
+                    offsetBeats += beatsToWait;
+                    maxBeats = (std::max)(maxBeats, offsetBeats);
 
-			index++;
-		}
+                    std::cout << "  [loop] Waiting " << beatsToWait << " beat(s)\n";
+                    continue;
+                }
 
-		std::this_thread::sleep_for(std::chrono::milliseconds((int)beatDurationMs));
-	}
+                auto it = loopActions.find(action.name);
+                if (it == loopActions.end()) {
+                    std::cerr << "[Warning] Unknown loop action: " << action.name << "\n";
+                    continue;
+                }
 
-	std::cout << "[LOOP] End of loop.\n";
+                double actionOffsetMs = offsetBeats * beatDurationMs;
+
+                std::thread([=]() {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(std::round(actionOffsetMs))));
+                    it->second(action);
+                    }).detach();
+
+                offsetBeats += 1.0;
+                maxBeats = (std::max)(maxBeats, offsetBeats);
+            }
+
+            double loopDurationBeats = (std::max)(1.0, maxBeats);
+            auto sleepDurationMs = static_cast<int>(std::round(loopDurationBeats * beatDurationMs));
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(sleepDurationMs));
+        }
+
+        std::cout << "[LOOP] End of loop.\n";
+}
+
+double Interpreter::parseBeatValue(const std::string& value) const {
+    if (value.empty()) {
+        return 0.0;
+    }
+
+    const auto slashPos = value.find('/');
+    if (slashPos != std::string::npos) {
+        try {
+            double numerator = std::stod(value.substr(0, slashPos));
+            double denominator = std::stod(value.substr(slashPos + 1));
+            if (denominator == 0.0) {
+                 return -1.0;
+            }
+            return numerator / denominator;
+        } catch (const std::exception&) {
+                return -1.0;
+        }
+    }
+
+    try {
+        return std::stod(value);
+    } catch (const std::exception&) {
+         return -1.0;
+    }
 }
