@@ -187,14 +187,10 @@ std::unique_ptr<Stmt> Parser::loopStatement() {
 		}
 
 		params.push_back({ name.lexeme, value.lexeme });
-
-		if (match(TokenType::SEMICOLON)) {
-			continue;
+		if (!match(TokenType::SEMICOLON)) {
+			std::cerr << "[Parser] Expected ';' after parameter '" << name.lexeme << "'.\n";
+			synchronize();
 		}
-
-		if (check(TokenType::RIGHT_BRACE)) break;
-
-		synchronize();
 	}
 
 	if (!match(TokenType::RIGHT_BRACE)) {

@@ -20,14 +20,18 @@ int main() {
 
 	Lexer lexer(source);
 	auto tokens = lexer.scanTokens();
-	
-	Parser parser(tokens);
-	auto statements = parser.parse();
 
-	AstPrinter printer;
-	for (auto& st : statements) {
-		if (st) st->accept(printer);
+	for (auto& t : tokens) {
+		std::cout << t.lexeme << std::endl;
 	}
+	
+	//Parser parser(tokens);
+	//auto statements = parser.parse();
+
+	//AstPrinter printer;
+	//for (auto& st : statements) {
+	//	if (st) st->accept(printer);
+	//}
 
 	//Interpreter interpreter;
 	//interpreter.interpret(statements);

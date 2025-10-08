@@ -27,6 +27,7 @@ static const std::unordered_map<std::string, TokenType> keywords = {
 	{"sample",                                 TokenType::SAMPLE},
 	{"volume",                                 TokenType::VOLUME},
 	{"pitch",                                  TokenType::PITCH},
+
 	{"loop",                                   TokenType::LOOP},
 };
 
@@ -107,6 +108,7 @@ void Lexer::scanToken() {
 		case '"': string(); break;
         default:
 			if (std::isdigit(c)) {
+				current--;
 				number();
 				break;
 			} else if (std::isalpha(c)) {
@@ -149,7 +151,6 @@ void Lexer::string() {
 
 void Lexer::number() {
 	while(std::isdigit(peek())) advance();
-	// 1
 
 	if (peek() == '.' && std::isdigit(peek_next())) {
         advance();
@@ -157,7 +158,6 @@ void Lexer::number() {
             advance();
         }
 	}
-	std::cout << start + " " + (int)(current - start) + peek();
 	std::string value = source.substr(start, current - start);
 	tokens.emplace_back(TokenType::NUMBER, value, line);
 }

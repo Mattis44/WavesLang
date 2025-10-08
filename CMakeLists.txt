@@ -29,6 +29,13 @@ add_custom_command(TARGET WavesLang POST_BUILD
         "$<TARGET_FILE_DIR:WavesLang>/src/vendor"
 )
 
+add_custom_command(TARGET WavesLang PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/src/examples/example.wv"
+        "$<TARGET_FILE_DIR:WavesLang>/examples/example.wv"
+)
+
+
 # --- Include directories ---
 target_include_directories(WavesLang PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
