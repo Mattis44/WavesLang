@@ -1,17 +1,18 @@
 imp {
-    drum as d,
-    piano as p
+    kick as k,
+    snare as s
 }
 
 cpm 120;
 
 set d {
-    sample "drum.wav";
+    // sample "drum.wav";
     volume 1;
     pitch 1.8;
 }
 
 loop {
-    play d;
-    play p;
+    play k;
+    wait 1/4;
+    play s;
 }

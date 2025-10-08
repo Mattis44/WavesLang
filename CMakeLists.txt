@@ -11,7 +11,7 @@ file(GLOB_RECURSE SOURCES
     "src/*.cpp"
 )
 
-add_executable(WavesLang ${SOURCES} "src/ast/AstPrinter.h")
+add_executable(WavesLang ${SOURCES} "src/ast/AstPrinter.h" "src/audio/engine.cpp")
 
 
 # --- Fix working directory for Visual Studio ---

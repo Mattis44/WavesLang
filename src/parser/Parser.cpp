@@ -145,10 +145,10 @@ std::unique_ptr<Stmt> Parser::cpmStatement() {
 		return nullptr;
 	}
 
-	double value = 0.0;
+	int value = 0;
 
 	try {
-		value = std::stod(number.lexeme);
+		value = std::stoi(number.lexeme);
 	} catch (...) {
 		std::cerr << "[Parser] Invalid CPM value: " << number.lexeme << "\n";
 	}

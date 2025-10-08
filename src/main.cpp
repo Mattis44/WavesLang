@@ -5,6 +5,7 @@
 #include "ast/AstPrinter.h"
 #include <fstream>
 #include <sstream>
+#include "audio/engine.h"
 
 using namespace std;
 
@@ -21,21 +22,22 @@ int main() {
 	Lexer lexer(source);
 	auto tokens = lexer.scanTokens();
 
-	for (auto& t : tokens) {
-		std::cout << t.lexeme << std::endl;
+	Parser parser(tokens);
+	auto statements = parser.parse();
+
+	std::cout << "PARSER : \n" << std::endl;
+	AstPrinter printer;
+	for (auto& st : statements) {
+		if (st) st->accept(printer);
 	}
-	
-	//Parser parser(tokens);
-	//auto statements = parser.parse();
 
-	//AstPrinter printer;
-	//for (auto& st : statements) {
-	//	if (st) st->accept(printer);
-	//}
+	std::cout << "\nINTERPRETER : \n" << std::endl;
 
-	//Interpreter interpreter;
-	//interpreter.interpret(statements);
+	initAudio();
 
+	Interpreter interpreter;
+	interpreter.interpret(statements);
 
+	shutdownAudio();
 	return 0;
 }

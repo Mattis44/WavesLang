@@ -37,8 +37,8 @@ public:
 
 class CpmStmt : public Stmt {
 public:
-	double value;
-	CpmStmt(double v) : value(std::move(v)) {}
+	int value;
+	CpmStmt(int v) : value(v) {}
 	void accept(StmtVisitor& visitor) override; 
 };
 
